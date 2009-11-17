@@ -1,0 +1,11 @@
+#labels Featured
+=Changes in v. 0.9.9.1 (released on 2009.11.20)=
+This release upgrades to Lucene 2.9.1 jars and Hadoop 0.20.1 jars.
+
+==New features and improvements==
+  * Add per-field value decoders, for displaying field values that should be interpreted as numeric or date or binary values.
+  * Improve the Analysis plugin to switch between the mixed and the only-new API.
+  * Improve visibility and layout of Thinlet tables.
+
+==Bug fixes==
+  * Term frequency vectors were not displayed for selected field.
