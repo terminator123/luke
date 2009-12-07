@@ -1,0 +1,19 @@
+#labels Featured
+=Compatibility=
+==Java version==
+Minimum version of JVM required to run Luke is 1.5.
+
+==Lucene Java indexes==
+Luke should be able to open indexes built using the following versions of Lucene-Java:
+
+ * 2.x (any version)
+ * _(1.9? 1.4? earlier? to be verified)_
+
+Please note that if you used Field.Store.COMPRESSED in your index, your field can be still retrieved by Lucene 2.9+, but the content of the field will be automatically decompressed. This means that during optimize the size of your index may grow substantially.
+
+==Lucene.Net indexes==
+Apparently recent versions of Lucene-Java cannot open indexes built with Lucene.Net - reported incompatible versions include:
+
+ * Lucene.Net 2.3.2.1 and Lucene-Java 2.9.1
+
+At the moment there is no workaround for this issue.
