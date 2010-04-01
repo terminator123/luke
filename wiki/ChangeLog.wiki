@@ -1,4 +1,19 @@
 #labels Featured
+=Changes in v. 1.0.1 (released on 2010.04.01)=
+This release upgrades to Lucene 3.0.1 jars.
+
+==New features and improvements==
+ * Issue 5: Field value decoder for 32 bit numeric fields (float, int) missing.
+ * Added support for XmlQueryParser.
+ * Issue 12: Add option to specify custom XmlQueryParser.
+==Bug fixes==
+ * Issue 3: Analyzer plugin (and analyzers) don't work.
+ * Issue 4: Compress flag no longer available.
+ * Issue 14: Error while using custom similarity.
+
+=Changes in v. 1.0.0 (released on 2009.12.23)=
+This release just upgrades to Lucene 3.0 jars.
+ 
 =Changes in v. 0.9.9.1 (released on 2009.11.20)=
 This release upgrades to Lucene 2.9.1 jars and Hadoop 0.20.1 jars.
 
