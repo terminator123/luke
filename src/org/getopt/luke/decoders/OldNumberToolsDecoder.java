@@ -1,12 +1,12 @@
 package org.getopt.luke.decoders;
 
-import org.apache.lucene.document.DateTools;
+import org.apache.lucene.document.NumberTools;
 
-public class DateDecoder implements Decoder {
+public class OldNumberToolsDecoder implements Decoder {
 
   @Override
   public String decodeTerm(String fieldName, Object value) throws Exception {
-    return DateTools.stringToDate(value.toString()).toString();
+    return Long.toString(NumberTools.stringToLong(value.toString()));
   }
   
   @Override
@@ -15,6 +15,7 @@ public class DateDecoder implements Decoder {
   }
   
   public String toString() {
-    return "date";
+    return "(old NumberTools)";
   }
+  
 }

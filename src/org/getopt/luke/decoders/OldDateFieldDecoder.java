@@ -1,12 +1,12 @@
 package org.getopt.luke.decoders;
 
-import org.apache.lucene.document.DateTools;
+import org.apache.lucene.document.DateField;
 
-public class DateDecoder implements Decoder {
+public class OldDateFieldDecoder implements Decoder {
 
   @Override
   public String decodeTerm(String fieldName, Object value) throws Exception {
-    return DateTools.stringToDate(value.toString()).toString();
+    return DateField.stringToDate(value.toString()).toString();
   }
   
   @Override
@@ -15,6 +15,7 @@ public class DateDecoder implements Decoder {
   }
   
   public String toString() {
-    return "date";
+    return "(old DateField)";
   }
+
 }

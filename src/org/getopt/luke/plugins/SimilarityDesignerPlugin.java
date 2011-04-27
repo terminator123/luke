@@ -9,13 +9,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.StringReader;
+import java.util.Collection;
 
 import javax.swing.JFileChooser;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.Token;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.index.FieldInvertState;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.DefaultSimilarity;
-import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Searcher;
+import org.apache.lucene.search.Similarity;
 import org.apache.lucene.search.Explanation.IDFExplanation;
 import org.getopt.luke.LukePlugin;
 import org.mozilla.javascript.Context;
@@ -302,7 +308,7 @@ class CustomSimilarity extends DefaultSimilarity {
   }
   
   @Override
-  public IDFExplanation idfExplain(Term term, IndexSearcher searcher)
+  public IDFExplanation idfExplain(Term term, Searcher searcher)
           throws IOException {
     int numDocs = searcher.maxDoc();
     int docFreq = searcher.docFreq(term);
