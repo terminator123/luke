@@ -3,7 +3,6 @@ package org.getopt.luke;
 import java.io.IOException;
 
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexReader.AtomicReaderContext;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.TimeLimitingCollector;
 import org.apache.lucene.search.TopDocs;
@@ -82,9 +81,9 @@ public class IntervalLimitedCollector extends LimitedHitCollector {
   }
 
   @Override
-  public void setNextReader(AtomicReaderContext context) throws IOException {
-    this.docBase = context.docBase;
-    thc.setNextReader(context);
+  public void setNextReader(IndexReader r, int base) throws IOException {
+    this.docBase = base;
+    thc.setNextReader(r, base);
   }
 
   @Override

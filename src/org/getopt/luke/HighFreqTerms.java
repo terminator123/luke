@@ -1,258 +1,132 @@
 package org.getopt.luke;
 
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+/* ====================================================================
+ * The Apache Software License, Version 1.1
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * Copyright (c) 2001 The Apache Software Foundation.  All rights
+ * reserved.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. The end-user documentation included with the redistribution,
+ *    if any, must include the following acknowledgment:
+ *       "This product includes software developed by the
+ *        Apache Software Foundation (http://www.apache.org/)."
+ *    Alternately, this acknowledgment may appear in the software itself,
+ *    if and wherever such third-party acknowledgments normally appear.
+ *
+ * 4. The names "Apache" and "Apache Software Foundation" and
+ *    "Apache Lucene" must not be used to endorse or promote products
+ *    derived from this software without prior written permission. For
+ *    written permission, please contact apache@apache.org.
+ *
+ * 5. Products derived from this software may not be called "Apache",
+ *    "Apache Lucene", nor may "Apache" appear in their name, without
+ *    prior written permission of the Apache Software Foundation.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ * ====================================================================
+ *
+ * This software consists of voluntary contributions made by many
+ * individuals on behalf of the Apache Software Foundation.  For more
+ * information on the Apache Software Foundation, please see
+ * <http://www.apache.org/>.
  */
 
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.MultiFields;
-import org.apache.lucene.index.Fields;
-import org.apache.lucene.index.TermsEnum;
-import org.apache.lucene.index.FieldsEnum;
-import org.apache.lucene.index.Terms;
-import org.apache.lucene.index.FieldReaderException;
-import org.apache.lucene.index.DocsEnum;
-import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.PriorityQueue;
-import org.apache.lucene.util.BytesRef;
-import org.apache.lucene.util.Bits;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.index.TermEnum;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Hashtable;
 
 /**
- * <b>NOTE: this is a temporary copy of contrib/misc from Lucene - 
- * we can get rid of it when LUCENE-2638 is integrated.</b>
- * 
- * <code>HighFreqTerms</code> class extracts the top n most frequent terms
- * (by document frequency ) from an existing Lucene index and reports their document frequencey.
- * If the -t flag is  and reports both their document frequency and their total tf (total number of occurences) 
- * in order of highest total tf
+ * <code>HighFreqTerms</code> class extracts terms and their frequencies out
+ * of an existing Lucene index.
+ *
+ * @version $Id: HighFreqTerms.java,v 1.2 2003/11/08 10:55:40 Administrator Exp $
  */
 public class HighFreqTerms {
-  private static final Logger LOG = LoggerFactory.getLogger(HighFreqTerms.class);
-  
-  // The top numTerms will be displayed
-  public static final int DEFAULTnumTerms = 100;
-  public static int numTerms = DEFAULTnumTerms;
-  
-  public static void main(String[] args) throws Exception {
-    IndexReader reader = null;
-    FSDirectory dir = null;
-    String field = null;
-    boolean IncludeTermFreqs = false; 
-   
-    if (args.length == 0 || args.length > 4) {
-      usage();
-      System.exit(1);
-    }     
-
-    if (args.length > 0) {
-      dir = FSDirectory.open(new File(args[0]));
-    }
-   
-    for (int i = 1; i < args.length; i++) {
-      if (args[i].equals("-t")) {
-        IncludeTermFreqs = true;
-      }
-      else{
-        try {
-          numTerms = Integer.parseInt(args[i]);
-        } catch (NumberFormatException e) {
-          field=args[i];
+    public static int defaultNumTerms = 100;
+    
+    public static void main(String[] args) throws Exception {
+        Directory dir = FSDirectory.open(new File(args[0]));
+        TermInfo[] terms = getHighFreqTerms(IndexReader.open(dir), null, new String[]{"body"});
+        for (int i = 0; i < terms.length; i++) {
+            System.out.println(i + ".\t" + terms[i].term);
         }
-      }
     }
-    String[] fields = field != null ? new String[]{field} : null;
-    reader = IndexReader.open(dir, true);
-    TermStats[] terms = getHighFreqTerms(reader, numTerms, fields);
-    if (!IncludeTermFreqs) {
-      //default HighFreqTerms behavior
-      for (int i = 0; i < terms.length; i++) {
-        System.out.printf("%s:%s %,d \n",
-            terms[i].field, terms[i].termtext.utf8ToString(), terms[i].docFreq);
-      }
-    }
-    else{
-      TermStats[] termsWithTF = sortByTotalTermFreq(reader, terms);
-      for (int i = 0; i < termsWithTF.length; i++) {
-        System.out.printf("%s:%s \t totalTF = %,d \t doc freq = %,d \n",
-            termsWithTF[i].field, termsWithTF[i].termtext.utf8ToString(),
-            termsWithTF[i].totalTermFreq, termsWithTF[i].docFreq);
-      }
-    }
-    reader.close();
-  }
-  
-  private static void usage() {
-    System.out
-        .println("\n\n"
-            + "java org.apache.lucene.misc.HighFreqTerms <index dir> [-t][number_terms] [field]\n\t -t: include totalTermFreq\n\n");
-  }
-  
-  private static final TermStats[] EMPTY_STATS = new TermStats[0];
-  /**
-   * 
-   * @param reader
-   * @param numTerms
-   * @param field
-   * @return TermStats[] ordered by terms with highest docFreq first.
-   * @throws Exception
-   */
-  public static TermStats[] getHighFreqTerms(IndexReader reader, int numTerms, String[] fieldNames) throws Exception {
-    TermStatsQueue tiq = null;
     
-    if (fieldNames != null) {
-      Fields fields = MultiFields.getFields(reader);
-      if (fields == null) {
-        LOG.info("Index with no fields - probably empty or corrupted");
-        return EMPTY_STATS;
-      }
-      tiq = new TermStatsQueue(numTerms);
-      for (String field : fieldNames) {
-        Terms terms = fields.terms(field);
-        if (terms != null) {
-          TermsEnum termsEnum = terms.iterator();
-          fillQueue(termsEnum, tiq, field);
+    public static TermInfo[] getHighFreqTerms(IndexReader ir, Hashtable junkWords, String[] fields) throws Exception {
+        return getHighFreqTerms(ir, junkWords, defaultNumTerms, fields);
+    }
+    
+    public static TermInfo[] getHighFreqTerms(IndexReader reader, Hashtable junkWords, int numTerms, String[] fields) throws Exception {
+        if (reader == null || fields == null) return null;
+        TermInfoQueue tiq = new TermInfoQueue(numTerms);
+        TermEnum terms = reader.terms();
+        
+        int minFreq = 0;
+        while (terms.next()) {
+            String field = terms.term().field();
+            if (fields != null && fields.length > 0) {
+                boolean skip = true;
+                for (int i = 0; i < fields.length; i++) {
+                    if (field.equals(fields[i])) {
+                        skip = false;
+                        break;
+                    }
+                }
+                if (skip) continue;
+            }
+            if (junkWords != null && junkWords.get(terms.term().text()) != null) continue;
+            if (terms.docFreq() > minFreq) {
+                tiq.insertWithOverflow(new TermInfo(terms.term(), terms.docFreq()));
+                if (tiq.size() >= numTerms) 		     // if tiq overfull
+                {
+                    tiq.pop();				     // remove lowest in tiq
+                    minFreq = ((TermInfo)tiq.top()).docFreq; // reset minFreq
+                }
+            }
         }
-      }
-    } else {
-      Fields fields = MultiFields.getFields(reader);
-      if (fields == null) {
-        LOG.info("Index with no fields - probably empty or corrupted");
-        return EMPTY_STATS;
-      }
-      tiq = new TermStatsQueue(numTerms);
-      FieldsEnum fieldsEnum = fields.iterator();
-      while (true) {
-        String field = fieldsEnum.next();
-        if (field != null) {
-          TermsEnum terms = fieldsEnum.terms();
-          fillQueue(terms, tiq, field);
-        } else {
-          break;
+        TermInfo[] res = new TermInfo[tiq.size()];
+        for (int i = 0; i < res.length; i++) {
+            res[res.length - i - 1] = (TermInfo)tiq.pop();
         }
-      }
+        return res;
     }
-    
-    TermStats[] result = new TermStats[tiq.size()];
-    // we want highest first so we read the queue and populate the array
-    // starting at the end and work backwards
-    int count = tiq.size() - 1;
-    while (tiq.size() != 0) {
-      result[count] = tiq.pop();
-      count--;
-    }
-    return result;
-  }
-  
-  /**
-   * Takes array of TermStats. For each term looks up the tf for each doc
-   * containing the term and stores the total in the output array of TermStats.
-   * Output array is sorted by highest total tf.
-   * 
-   * @param reader
-   * @param terms
-   *          TermStats[]
-   * @return TermStats[]
-   * @throws Exception
-   */
-  
-  public static TermStats[] sortByTotalTermFreq(IndexReader reader, TermStats[] terms) throws Exception {
-    TermStats[] ts = new TermStats[terms.length]; // array for sorting
-    long totalTF;
-    for (int i = 0; i < terms.length; i++) {
-      totalTF = getTotalTermFreq(reader, terms[i].field, terms[i].termtext);
-      ts[i] = new TermStats(terms[i].field, terms[i].termtext, terms[i].docFreq, totalTF);
-    }
-    
-    Comparator<TermStats> c = new TotalTermFreqComparatorSortDescending();
-    Arrays.sort(ts, c);
-    
-    return ts;
-  }
-  
-  public static long getTotalTermFreq(IndexReader reader, String field, BytesRef termtext) throws Exception {
-    BytesRef br = termtext;
-    long totalTF = 0;
-    Bits skipDocs = MultiFields.getDeletedDocs(reader);
-    DocsEnum de = MultiFields.getTermDocsEnum(reader, skipDocs, field, br);
-    // if term is not in index return totalTF of 0
-    if (de == null) {
-      return 0;
-    }
-    // use DocsEnum.read() and BulkResult api
-    final DocsEnum.BulkReadResult bulkresult = de.getBulkResult();
-    int count;
-    while ((count = de.read()) != 0) {
-      final int[] freqs = bulkresult.freqs.ints;
-      final int limit = bulkresult.freqs.offset + count;
-      for(int i=bulkresult.freqs.offset;i<limit;i++) {
-        totalTF += freqs[i];
-      }
-    }
-    return totalTF;
-  }
-  
-  public static void fillQueue(TermsEnum termsEnum, TermStatsQueue tiq, String field) throws Exception {
-    
-  while (true) {
-      BytesRef term = termsEnum.next();
-      if (term != null) {
-        tiq.insertWithOverflow(new TermStats(field, term, termsEnum.docFreq()));
-      } else {
-        break;
-      }
-    }
-  }
- }
-
-/**
- * Comparator
- * 
- * Reverse of normal Comparator. i.e. returns 1 if a.totalTermFreq is less than
- * b.totalTermFreq So we can sort in descending order of totalTermFreq
- */
-
-final class TotalTermFreqComparatorSortDescending implements Comparator<TermStats> {
-  
-  public int compare(TermStats a, TermStats b) {
-    if (a.totalTermFreq < b.totalTermFreq) {
-      return 1;
-    } else if (a.totalTermFreq > b.totalTermFreq) {
-      return -1;
-    } else {
-      return 0;
-    }
-  }
 }
 
-/**
- * Priority queue for TermStats objects ordered by docFreq
- **/
-final class TermStatsQueue extends PriorityQueue<TermStats> {
-  TermStatsQueue(int size) {
-    super(size);
-  }
-  
-  @Override
-  protected boolean lessThan(TermStats termInfoA, TermStats termInfoB) {
-    return termInfoA.docFreq < termInfoB.docFreq;
-  }
+final class TermInfoQueue extends PriorityQueue<TermInfo> {
+    TermInfoQueue(int size) {
+        initialize(size);
+    }
+    protected final boolean lessThan(TermInfo a, TermInfo b) {
+        TermInfo termInfoB = (TermInfo)b;
+        return a.docFreq < b.docFreq;
+    }
 }
