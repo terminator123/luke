@@ -1,4 +1,19 @@
 #labels Featured
+
+=Changes in version 3.1.0 (released on 2011.04.30)=
+This release uses Lucene 3.1.0 jars.
+
+* Issue 35: Lucene 3.1 compatible luke version (oss.akk)
+* Issue 36: XMLExporter generating invalid XML, when special characters are present
+  in a TermVector field (Craig.Stires)
+* Issue 17: Recent changes to DocReconstructor sometimes cause null ref (solrtrey)
+* Issue 19: Custom directory implementation must be inherited from
+  FSDirectory (mitja.lenic)
+* Issue 21: luke tarball needs to extract to a "luke" directory (bevan.koopman,
+  Photodeus)
+* Issue 33: Term Positions increment incorrect (karolina.bernat)
+* Issue 27: Cannot add or edit documents using StandardAnalyzer (dean.thrasher)
+
 =Changes in v. 1.0.1 (released on 2010.04.01)=
 This release upgrades to Lucene 3.0.1 jars.
 
