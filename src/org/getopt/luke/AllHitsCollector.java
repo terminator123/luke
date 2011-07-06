@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexReader.AtomicReaderContext;
 import org.apache.lucene.search.Scorer;
 
 class AllHitsCollector extends AccessibleHitCollector {
@@ -59,8 +58,8 @@ class AllHitsCollector extends AccessibleHitCollector {
   }
 
   @Override
-  public void setNextReader(AtomicReaderContext context) throws IOException {
-    this.docBase = context.docBase;
+  public void setNextReader(IndexReader r, int docBase) throws IOException {
+    this.docBase = docBase;
   }
 
   @Override

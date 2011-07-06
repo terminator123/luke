@@ -1,23 +1,31 @@
-Changes in unreleased version:
+Changes in version 3.3.0 (released on 2001.07.06):
+* Issue 40 and 41: Update to Lucene 3.3.0 and fix some deprecated / changed APIs.
 
+Changes in version 3.1.0 (released on 2011.04.30):
+
+* Issue 35: Lucene 3.1 compatible luke version (oss.akk)
 * Issue 36: XMLExporter generating invalid XML, when special characters are present
   in a TermVector field (Craig.Stires)
+* Issue 17: Recent changes to DocReconstructor sometimes cause null ref (solrtrey)
 * Issue 19: Custom directory implementation must be inherited from
   FSDirectory (mitja.lenic)
-* Issue 21: luke tarball needs to extract to a "luke" directory (bevan.koopman,
+* Issue 21: luke tarball needs to extract to a "luke" directory (bevan.koopman, 
   Photodeus)
+* Issue 33: Term Positions increment incorrect (karolina.bernat)
 * Issue 27: Cannot add or edit documents using StandardAnalyzer (dean.thrasher)
 
 ---------------------------------------------------------------------------
   Changes in v. 1.0.1 (released on 2010.04.01):
 
    This release upgrades to Lucene 3.0.1 jars.
+     * New features and improvements:
+          + Issue 5: Field value decoder for 32 bit numeric fields (float,
+            int) missing.
+          + Added support for XmlQueryParser.
+          + Issue 12: Add option to specify custom XmlQueryParser.
      * Bug fixes:
           + Issue 3: Analyzer plugin (and analyzers) don't work.
           + Issue 4: Compress flag no longer available.
-          + Issue 5: Field value decoder for 32 bit numeric fields (float,
-            int) missing.
-          + Issue 12: Add option to specify custom XmlQueryParser.
           + Issue 14: Error while using custom similarity.
 
   Changes in v. 1.0.0 (released on 2009.12.23):
