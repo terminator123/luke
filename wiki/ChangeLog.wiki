@@ -1,4 +1,19 @@
 #labels Featured
+=Changes in version 3.5.0 (released on 2011.12.28)=
+ * Update to Lucene 3.5.0 and fix some deprecated API usage.
+ * Issue 49: fix faulty logic that prevented opening indexes in read-only mode (MarkHarwood).
+ * Issue 43: fix left-over references to Field (merkertr).
+ * Issue 42: Luke should indicate if a field is a numeric field (merkertr).
+
+=Changes in version 3.4.0 (released on 2011.10.03)=
+ * Issue 46: and 47: Update to Lucene 3.4.0 and fix some changed APIs.
+ * Rearranged "field flags" so that they are more logical and cover index options added in 3.4.0. E.g. omitNorms is represented as "with Norms" and marked by "N", IndexOptions are expanded to "Idfp" to mark indexed fields with docs, freqs and positions.
+
+Update: version 3.4.0_1 fixes a silly last-minute typo in luke.xml.
+
+=Changes in version 3.3.0 (released on 2011.07.06)=
+ * Issue 40 and 41: Update to Lucene 3.3.0 and fix some deprecated / changed APIs.
+
 =Changes in version 3.1.0 (released on 2011.04.30)=
 This release uses Lucene 3.1.0 jars.
 
